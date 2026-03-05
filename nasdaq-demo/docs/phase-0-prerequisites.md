@@ -46,7 +46,7 @@ cd openflow-demo/nasdaq-demo
 
 ## Snowflake Database Setup
 
-Create the `NASDAQ_DEMO` database, stage, and permissions required by the workshop.
+Create the `NASDAQ_DEMO` database, the `OPENFLOW_RUNTIME_ROLE` role, stage, and permissions required by the workshop.
 
 > **Cortex Code CLI**
 >

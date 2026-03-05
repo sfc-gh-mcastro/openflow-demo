@@ -1,5 +1,5 @@
 -- Snowflake setup for the Openflow Financial Services Workshop.
--- Creates the NASDAQ_DEMO database, stage, and permissions required by the workshop.
+-- Creates the NASDAQ_DEMO database, OPENFLOW_RUNTIME_ROLE, stage, and permissions required by the workshop.
 
 USE ROLE ACCOUNTADMIN;
 
@@ -10,6 +10,11 @@ USE DATABASE NASDAQ_DEMO;
 CREATE OR REPLACE STAGE EARNINGS_REPORTS_STAGE
     ENCRYPTION = ( TYPE = 'SNOWFLAKE_SSE')
     DIRECTORY = ( ENABLE = TRUE );
+
+-- Openflow runtime role
+-- See: https://docs.snowflake.com/en/user-guide/data-integration/openflow/setup-openflow-spcs-create-rr
+CREATE ROLE IF NOT EXISTS OPENFLOW_RUNTIME_ROLE;
+GRANT ROLE OPENFLOW_RUNTIME_ROLE TO ROLE ACCOUNTADMIN;
 
 -- Permissions for the Openflow runtime role
 GRANT USAGE ON DATABASE NASDAQ_DEMO TO ROLE OPENFLOW_RUNTIME_ROLE;
