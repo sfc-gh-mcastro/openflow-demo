@@ -170,13 +170,93 @@ These are important NiFi configuration details discovered during implementation:
 | **AWS Credentials** | NiFi's `AWSCredentialsProviderControllerService` does not support `Session Token` - use long-lived AKIA* keys |
 | **S3 Region** | Must match the actual bucket region (check with `aws s3api get-bucket-location`) |
 
+## Connecting to Postgres
+
+### Prerequisites
+
+- `psql` (PostgreSQL client) installed locally
+- **VPN must be disconnected** — GlobalProtect and similar VPN clients intercept the TLS handshake on port 5432 and break the Postgres SSL negotiation, causing `SSL error: unexpected eof while reading`. Disconnect your VPN or request a split-tunnel exclusion for `*.postgres.snowflake.app`.
+
+### Network Policy (allow external connections)
+
+By default, Snowflake Postgres instances reject all incoming connections. Create a `POSTGRES_INGRESS` network rule to allow your IP:
+
+```sql
+-- Create ingress rule (replace with your IP or use 0.0.0.0/0 for testing)
+CREATE NETWORK RULE API_DEMO.PUBLIC.BTC_POSTGRES_INGRESS_RULE
+    TYPE = IPV4
+    VALUE_LIST = ('<your_ip>/32')
+    MODE = POSTGRES_INGRESS;
+
+-- Create and attach network policy
+CREATE NETWORK POLICY BTC_POSTGRES_POLICY
+    ALLOWED_NETWORK_RULE_LIST = ('API_DEMO.PUBLIC.BTC_POSTGRES_INGRESS_RULE');
+
+ALTER POSTGRES INSTANCE API_DEMO.PUBLIC.BTC_POSTGRES
+    SET NETWORK_POLICY = 'BTC_POSTGRES_POLICY';
+```
+
+### Save Connection Locally
+
+Add the instance to your PostgreSQL service file (`~/.pg_service.conf`):
+
+```ini
+[btc_postgres]
+host=<your_postgres_host>.postgres.snowflake.app
+port=5432
+dbname=postgres
+user=application
+sslmode=require
+```
+
+Add the password to `~/.pgpass` (must have `chmod 600` permissions):
+
+```
+<your_postgres_host>.postgres.snowflake.app:5432:postgres:application:<your_password>
+```
+
+### Connect and Query
+
+```bash
+# Interactive session
+psql "service=btc_postgres"
+
+# Row count
+psql "service=btc_postgres" -c "SELECT count(*) FROM flow1_cdc.btc_trades;"
+
+# Latest trades
+psql "service=btc_postgres" -c \
+  "SELECT trade_id, side, price, size, time
+   FROM flow1_cdc.btc_trades
+   ORDER BY time DESC LIMIT 10;"
+
+# Price summary
+psql "service=btc_postgres" -c \
+  "SELECT side,
+          count(*) AS trades,
+          round(min(price)::numeric, 2) AS min_price,
+          round(avg(price)::numeric, 2) AS avg_price,
+          round(max(price)::numeric, 2) AS max_price
+   FROM flow1_cdc.btc_trades
+   GROUP BY side;"
+```
+
+### Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `SSL error: unexpected eof while reading` | VPN (GlobalProtect) intercepting TLS | Disconnect VPN or add split-tunnel exclusion for `*.postgres.snowflake.app` |
+| `connection refused` | IP not in network policy | Add your IP to the `POSTGRES_INGRESS` rule |
+| `password authentication failed` | Wrong password or user | Check `~/.pgpass` entry matches the instance credentials |
+| `timeout` | Instance is suspended | Run `ALTER POSTGRES INSTANCE ... RESUME` in Snowflake |
+
 ## Verification
 
 Once the flow is running, verify data is flowing:
 
 1. **NiFi Bulletin Board** - No errors on any processor
 2. **S3 Bucket** - JSON files appearing at `s3://<bucket>/btc_trades/YYYYMMDD-HHmmss.json`
-3. **Postgres** - Connect to the instance and run:
+3. **Postgres** - Connect via psql (see above) and run:
    ```sql
    SELECT COUNT(*) FROM flow1_cdc.btc_trades;
    SELECT * FROM flow1_cdc.btc_trades ORDER BY trade_id DESC LIMIT 10;
