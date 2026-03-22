@@ -1,0 +1,59 @@
+{
+  "json_proto": {
+    "name": "imf_economic_outlook",
+    "database": "API_DEMO",
+    "schema": "PUBLIC",
+    "tables": [
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "IMF_DATAMAPPER_INDICATORS",
+        "columnNames": ["INDICATOR", "COUNTRY_CODE", "YEAR", "VALUE", "INGESTION_TIMESTAMP"]
+      },
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "COUNTRY_METADATA",
+        "columnNames": ["COUNTRY_CODE", "COUNTRY_NAME", "REGION", "INCOME_GROUP", "IS_G7", "IS_G20", "IS_EMERGING"]
+      },
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "INDICATOR_METADATA",
+        "columnNames": ["INDICATOR", "INDICATOR_NAME", "UNIT", "DESCRIPTION"]
+      }
+    ],
+    "sqlSource": {
+      "queries": [
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE c.COUNTRY_NAME = 'India' AND i.INDICATOR = 'NGDP_RPCH' AND i.YEAR BETWEEN 2024 AND 2030 ORDER BY i.YEAR",
+          "correspondingQuestion": "What is India's GDP growth forecast from 2024 to 2030?"
+        },
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE JOIN API_DEMO.PUBLIC.INDICATOR_METADATA m ON i.INDICATOR = m.INDICATOR WHERE c.REGION = 'Europe' AND i.INDICATOR = 'LUR' AND i.YEAR = 2024 ORDER BY i.VALUE DESC",
+          "correspondingQuestion": "Compare unemployment rates across European countries in 2024"
+        },
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE c.IS_G7 = TRUE AND i.INDICATOR = 'PCPIPCH' AND i.YEAR BETWEEN 2024 AND 2030 ORDER BY c.COUNTRY_NAME, i.YEAR",
+          "correspondingQuestion": "What are the inflation projections for G7 countries from 2024 to 2030?"
+        },
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE i.INDICATOR = 'NGDPD' AND i.YEAR = 2025 ORDER BY i.VALUE DESC LIMIT 10",
+          "correspondingQuestion": "What are the top 10 economies by nominal GDP in 2025?"
+        },
+        {
+          "sqlText": "SELECT c.REGION, AVG(i.VALUE) AS avg_gdp_growth FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE i.INDICATOR = 'NGDP_RPCH' AND i.YEAR = 2025 GROUP BY c.REGION ORDER BY avg_gdp_growth DESC",
+          "correspondingQuestion": "What is the average GDP growth by region in 2025?"
+        },
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, MAX(CASE WHEN i.INDICATOR = 'NGDP_RPCH' THEN i.VALUE END) AS gdp_growth, MAX(CASE WHEN i.INDICATOR = 'PCPIPCH' THEN i.VALUE END) AS inflation, MAX(CASE WHEN i.INDICATOR = 'LUR' THEN i.VALUE END) AS unemployment FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE c.IS_G20 = TRUE AND i.YEAR = 2025 AND i.INDICATOR IN ('NGDP_RPCH', 'PCPIPCH', 'LUR') GROUP BY c.COUNTRY_NAME ORDER BY gdp_growth DESC",
+          "correspondingQuestion": "Show GDP growth, inflation, and unemployment for all G20 countries in 2025"
+        }
+      ]
+    },
+    "semanticDescription": "IMF World Economic Outlook data covering 15 macroeconomic indicators (GDP, inflation, unemployment, government debt, current account, population, PPP) for 60 countries from 1980-2030. Enables analysis by country, region, income group, and economic groupings (G7, G20, emerging markets). Supports forecasting questions, cross-country comparisons, and trend analysis.",
+    "metadata": {
+      "warehouse": "COMPUTE_WH"
+    }
+  }
+}

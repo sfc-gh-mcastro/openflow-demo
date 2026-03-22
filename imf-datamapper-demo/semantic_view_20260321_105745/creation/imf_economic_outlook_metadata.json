@@ -1,0 +1,15 @@
+{
+  "semantic_view_name": "imf_economic_outlook",
+  "target_database": "API_DEMO",
+  "target_schema": "PUBLIC",
+  "request_id": "fastgen_query_id",
+  "warnings": [],
+  "errors": [],
+  "suggestions_applied": [],
+  "suggestions_filtered": [],
+  "tables_included": [
+    "API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS",
+    "API_DEMO.PUBLIC.COUNTRY_METADATA",
+    "API_DEMO.PUBLIC.INDICATOR_METADATA"
+  ]
+}

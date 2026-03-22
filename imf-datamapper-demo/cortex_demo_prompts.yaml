@@ -1,0 +1,10 @@
+# IMF World Economic Outlook Explorer Demo
+# Products: Cortex AI Functions, Semantic Views, Cortex Agents, Snowflake Intelligence, React/Next.js
+prompts:
+  - What tables do we have in API_DEMO.PUBLIC? Describe the IMF data and enrichment tables.
+  - Using AI_COMPLETE, generate a brief economic outlook summary for the G7 countries based on their 2024-2030 GDP growth and inflation projections in API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS
+  - Create a semantic view over the IMF economic data in API_DEMO.PUBLIC so analysts can ask questions like "What is India's GDP forecast?" or "Compare unemployment rates across Europe"
+  - Build a Cortex Agent that uses the semantic view to answer natural language questions about the world economy
+  - Make this agent available in Snowflake Intelligence
+  - Build a React app that lets users select countries and compare economic indicators like GDP growth, inflation, and unemployment over time using charts. Use the IMF data in API_DEMO.PUBLIC.
+  - Which emerging market economies are projected to overtake current top-10 GDP rankings by 2030?

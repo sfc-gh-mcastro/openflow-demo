@@ -1,0 +1,149 @@
+name: imf_economic_outlook
+description: IMF World Economic Outlook data covering 15 macroeconomic indicators
+  (GDP, inflation, unemployment, government debt, current account, population, PPP)
+  for 60 countries from 1980-2030. Enables analysis by country, region, income group,
+  and economic groupings (G7, G20, emerging markets). Supports forecasting questions,
+  cross-country comparisons, and trend analysis.
+tables:
+  - name: IMF_DATAMAPPER_INDICATORS
+    base_table:
+      database: API_DEMO
+      schema: PUBLIC
+      table: IMF_DATAMAPPER_INDICATORS
+    dimensions:
+      - name: INDICATOR
+        expr: INDICATOR
+        data_type: VARCHAR
+      - name: COUNTRY_CODE
+        expr: COUNTRY_CODE
+        data_type: VARCHAR
+      - name: YEAR
+        expr: YEAR
+        data_type: NUMBER
+    time_dimensions:
+      - name: INGESTION_TIMESTAMP
+        expr: INGESTION_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: VALUE
+        expr: VALUE
+        data_type: FLOAT
+  - name: COUNTRY_METADATA
+    base_table:
+      database: API_DEMO
+      schema: PUBLIC
+      table: COUNTRY_METADATA
+    primary_key:
+      columns:
+        - COUNTRY_CODE
+    dimensions:
+      - name: COUNTRY_CODE
+        expr: COUNTRY_CODE
+        data_type: VARCHAR
+      - name: COUNTRY_NAME
+        expr: COUNTRY_NAME
+        data_type: VARCHAR
+      - name: REGION
+        expr: REGION
+        data_type: VARCHAR
+      - name: INCOME_GROUP
+        expr: INCOME_GROUP
+        data_type: VARCHAR
+      - name: IS_G7
+        expr: IS_G7
+        data_type: BOOLEAN
+      - name: IS_G20
+        expr: IS_G20
+        data_type: BOOLEAN
+      - name: IS_EMERGING
+        expr: IS_EMERGING
+        data_type: BOOLEAN
+  - name: INDICATOR_METADATA
+    base_table:
+      database: API_DEMO
+      schema: PUBLIC
+      table: INDICATOR_METADATA
+    primary_key:
+      columns:
+        - INDICATOR
+    dimensions:
+      - name: INDICATOR
+        expr: INDICATOR
+        data_type: VARCHAR
+      - name: INDICATOR_NAME
+        expr: INDICATOR_NAME
+        data_type: VARCHAR
+      - name: UNIT
+        expr: UNIT
+        data_type: VARCHAR
+      - name: DESCRIPTION
+        expr: DESCRIPTION
+        data_type: VARCHAR
+relationships:
+  - name: IMF_DATAMAPPER_INDICATORS_TO_COUNTRY_METADATA
+    left_table: IMF_DATAMAPPER_INDICATORS
+    right_table: COUNTRY_METADATA
+    join_type: inner
+    relationship_type: many_to_one
+    relationship_columns:
+      - left_column: COUNTRY_CODE
+        right_column: COUNTRY_CODE
+  - name: IMF_DATAMAPPER_INDICATORS_TO_INDICATOR_METADATA
+    left_table: IMF_DATAMAPPER_INDICATORS
+    right_table: INDICATOR_METADATA
+    join_type: inner
+    relationship_type: many_to_one
+    relationship_columns:
+      - left_column: INDICATOR
+        right_column: INDICATOR
+verified_queries:
+  - name: 0;1
+    question: What is India's GDP growth forecast from 2024 to 2030?
+    sql: SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE FROM imf_datamapper_indicators AS
+      i JOIN country_metadata AS c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE c.COUNTRY_NAME
+      = 'India' AND i.INDICATOR = 'NGDP_RPCH' AND i.YEAR BETWEEN 2024 AND 2030 ORDER
+      BY i.YEAR
+    verified_at: 1774087187
+    verified_by: Semantic Model Generator
+  - name: 1;1
+    question: What are the unemployment rates across European countries in 2024?
+    sql: SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE FROM imf_datamapper_indicators AS
+      i JOIN country_metadata AS c ON i.COUNTRY_CODE = c.COUNTRY_CODE JOIN indicator_metadata
+      AS m ON i.INDICATOR = m.INDICATOR WHERE c.REGION = 'Europe' AND i.INDICATOR
+      = 'LUR' AND i.YEAR = 2024 ORDER BY i.VALUE DESC
+    verified_at: 1774087187
+    verified_by: Semantic Model Generator
+  - name: 2;1
+    question: What are the inflation projections for G7 countries from 2024 to 2030?
+    sql: SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE FROM imf_datamapper_indicators AS
+      i JOIN country_metadata AS c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE c.IS_G7
+      = TRUE AND i.INDICATOR = 'PCPIPCH' AND i.YEAR BETWEEN 2024 AND 2030 ORDER BY
+      c.COUNTRY_NAME, i.YEAR
+    verified_at: 1774087187
+    verified_by: Semantic Model Generator
+  - name: 3;1
+    question: What are the top 10 economies by nominal GDP in 2025?
+    sql: SELECT c.COUNTRY_NAME, i.VALUE FROM imf_datamapper_indicators AS i JOIN country_metadata
+      AS c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE i.INDICATOR = 'NGDPD' AND i.YEAR
+      = 2025 ORDER BY i.VALUE DESC LIMIT 10
+    verified_at: 1774087187
+    verified_by: Semantic Model Generator
+  - name: 4;1
+    question: What is the average GDP growth by region in 2025?
+    sql: SELECT c.REGION, AVG(i.VALUE) AS avg_gdp_growth FROM imf_datamapper_indicators
+      AS i JOIN country_metadata AS c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE i.INDICATOR
+      = 'NGDP_RPCH' AND i.YEAR = 2025 GROUP BY c.REGION ORDER BY avg_gdp_growth DESC
+    verified_at: 1774087187
+    verified_by: Semantic Model Generator
+  - name: 5;1
+    question: What were the GDP growth, inflation, and unemployment rates for all
+      G20 countries in 2025?
+    sql: SELECT c.COUNTRY_NAME, MAX(CASE WHEN i.INDICATOR = 'NGDP_RPCH' THEN i.VALUE
+      END) AS gdp_growth, MAX(CASE WHEN i.INDICATOR = 'PCPIPCH' THEN i.VALUE END)
+      AS inflation, MAX(CASE WHEN i.INDICATOR = 'LUR' THEN i.VALUE END) AS unemployment
+      FROM imf_datamapper_indicators AS i JOIN country_metadata AS c ON i.COUNTRY_CODE
+      = c.COUNTRY_CODE WHERE c.IS_G20 = TRUE AND i.YEAR = 2025 AND i.INDICATOR IN
+      ('NGDP_RPCH', 'PCPIPCH', 'LUR') GROUP BY c.COUNTRY_NAME ORDER BY gdp_growth
+      DESC
+    verified_at: 1774087187
+    verified_by: Semantic Model Generator

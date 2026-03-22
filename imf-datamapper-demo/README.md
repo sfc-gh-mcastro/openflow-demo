@@ -129,4 +129,4 @@ Deploy and run the IMF DataMapper demo:
 - [Cortex Code CLI](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli)
 - [Openflow](https://docs.snowflake.com/en/user-guide/data-integration/openflow)
 - [NiPyApi](https://nipyapi.readthedocs.io/)
-- [Apache NiFi REST API](https://nifi.apache.org/docs/nifi-docs/rest-api/index.html)
+- [Apache NiFi REST API](https://nifi.apache.org/docs/nifi-docs/rest-api/index.html)q

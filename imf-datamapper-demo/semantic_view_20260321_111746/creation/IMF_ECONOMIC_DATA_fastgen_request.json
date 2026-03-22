@@ -1,0 +1,71 @@
+{
+  "json_proto": {
+    "name": "IMF_ECONOMIC_DATA",
+    "database": "API_DEMO",
+    "schema": "PUBLIC",
+    "tables": [
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "IMF_DATAMAPPER_INDICATORS",
+        "columnNames": ["INDICATOR", "COUNTRY_CODE", "YEAR", "VALUE", "INGESTION_TIMESTAMP"]
+      },
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "COUNTRY_METADATA",
+        "columnNames": ["COUNTRY_CODE", "COUNTRY_NAME", "REGION", "INCOME_GROUP", "IS_G7", "IS_G20", "IS_EMERGING"]
+      },
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "INDICATOR_METADATA",
+        "columnNames": ["INDICATOR", "INDICATOR_NAME", "UNIT", "DESCRIPTION"]
+      }
+    ],
+    "sqlSource": {
+      "queries": [
+        {
+          "sqlText": "SELECT cm.COUNTRY_NAME, i.YEAR, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA cm ON i.COUNTRY_CODE = cm.COUNTRY_CODE JOIN API_DEMO.PUBLIC.INDICATOR_METADATA im ON i.INDICATOR = im.INDICATOR WHERE cm.COUNTRY_NAME = 'India' AND im.INDICATOR_NAME = 'GDP (Nominal)' AND i.YEAR >= 2024 ORDER BY i.YEAR",
+          "database": "API_DEMO",
+          "schema": "PUBLIC",
+          "correspondingQuestion": "What is India's GDP forecast?"
+        },
+        {
+          "sqlText": "SELECT cm.COUNTRY_NAME, i.YEAR, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA cm ON i.COUNTRY_CODE = cm.COUNTRY_CODE JOIN API_DEMO.PUBLIC.INDICATOR_METADATA im ON i.INDICATOR = im.INDICATOR WHERE cm.REGION = 'Europe' AND im.INDICATOR_NAME = 'Unemployment Rate' AND i.YEAR = 2025 ORDER BY i.VALUE DESC",
+          "database": "API_DEMO",
+          "schema": "PUBLIC",
+          "correspondingQuestion": "Compare unemployment rates across European countries in 2025"
+        },
+        {
+          "sqlText": "SELECT cm.COUNTRY_NAME, i.YEAR, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA cm ON i.COUNTRY_CODE = cm.COUNTRY_CODE WHERE i.INDICATOR = 'NGDP_RPCH' AND cm.IS_G7 = TRUE AND i.YEAR = 2025 ORDER BY i.VALUE DESC",
+          "database": "API_DEMO",
+          "schema": "PUBLIC",
+          "correspondingQuestion": "What is the real GDP growth rate for G7 countries in 2025?"
+        },
+        {
+          "sqlText": "SELECT cm.REGION, AVG(i.VALUE) AS AVG_INFLATION FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA cm ON i.COUNTRY_CODE = cm.COUNTRY_CODE WHERE i.INDICATOR = 'PCPIPCH' AND i.YEAR = 2025 GROUP BY cm.REGION ORDER BY AVG_INFLATION DESC",
+          "database": "API_DEMO",
+          "schema": "PUBLIC",
+          "correspondingQuestion": "What is the average inflation rate by region in 2025?"
+        },
+        {
+          "sqlText": "SELECT cm.COUNTRY_NAME, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA cm ON i.COUNTRY_CODE = cm.COUNTRY_CODE WHERE i.INDICATOR = 'NGDPD' AND i.YEAR = 2025 ORDER BY i.VALUE DESC LIMIT 10",
+          "database": "API_DEMO",
+          "schema": "PUBLIC",
+          "correspondingQuestion": "What are the top 10 countries by nominal GDP in 2025?"
+        },
+        {
+          "sqlText": "SELECT cm.COUNTRY_NAME, i.VALUE AS DEBT_PCT_GDP FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA cm ON i.COUNTRY_CODE = cm.COUNTRY_CODE WHERE i.INDICATOR = 'GGXWDG_NGDP' AND cm.IS_G20 = TRUE AND i.YEAR = 2025 ORDER BY i.VALUE DESC",
+          "database": "API_DEMO",
+          "schema": "PUBLIC",
+          "correspondingQuestion": "What is the government debt as percentage of GDP for G20 countries?"
+        }
+      ]
+    },
+    "semanticDescription": "IMF World Economic Outlook data covering 229 countries from 1980 to 2030 (including forecasts). Includes 15 key macroeconomic indicators such as GDP (nominal and PPP), real GDP growth, inflation, unemployment, government debt, current account balance, and population. Enriched with country metadata (region, income group, G7/G20/emerging market classification) and indicator metadata (human-readable names, units, descriptions). Analysts use this to compare economic performance across countries, regions, and income groups, track historical trends, and analyze IMF forecasts.",
+    "metadata": {
+      "warehouse": "COMPUTE_WH"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "json_proto": {
+    "name": "imf_economic_outlook",
+    "database": "API_DEMO",
+    "schema": "PUBLIC",
+    "tables": [
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "IMF_DATAMAPPER_INDICATORS",
+        "columnNames": ["INDICATOR", "COUNTRY_CODE", "YEAR", "VALUE", "INGESTION_TIMESTAMP"]
+      },
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "COUNTRY_METADATA",
+        "columnNames": ["COUNTRY_CODE", "COUNTRY_NAME", "REGION", "INCOME_GROUP", "IS_G7", "IS_G20", "IS_EMERGING"]
+      },
+      {
+        "database": "API_DEMO",
+        "schema": "PUBLIC",
+        "table": "INDICATOR_METADATA",
+        "columnNames": ["INDICATOR", "INDICATOR_NAME", "UNIT", "DESCRIPTION"]
+      }
+    ],
+    "sqlSource": {
+      "queries": [
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE, m.INDICATOR_NAME, m.UNIT FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE JOIN API_DEMO.PUBLIC.INDICATOR_METADATA m ON i.INDICATOR = m.INDICATOR WHERE c.COUNTRY_NAME = 'India' AND i.INDICATOR = 'NGDPD' ORDER BY i.YEAR",
+          "correspondingQuestion": "What is India's GDP forecast?"
+        },
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE i.INDICATOR = 'LUR' AND c.REGION = 'Europe' ORDER BY c.COUNTRY_NAME, i.YEAR",
+          "correspondingQuestion": "Compare unemployment rates across Europe"
+        },
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, i.YEAR, i.VALUE, m.INDICATOR_NAME FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE JOIN API_DEMO.PUBLIC.INDICATOR_METADATA m ON i.INDICATOR = m.INDICATOR WHERE c.IS_G7 = TRUE AND i.INDICATOR IN ('NGDP_RPCH', 'PCPIPCH') AND i.YEAR BETWEEN 2024 AND 2030 ORDER BY c.COUNTRY_NAME, i.INDICATOR, i.YEAR",
+          "correspondingQuestion": "What are the GDP growth and inflation projections for G7 countries from 2024 to 2030?"
+        },
+        {
+          "sqlText": "SELECT c.COUNTRY_NAME, c.REGION, c.INCOME_GROUP, i.VALUE AS GDP_NOMINAL FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE i.INDICATOR = 'NGDPD' AND i.YEAR = 2025 ORDER BY i.VALUE DESC",
+          "correspondingQuestion": "Which countries have the largest GDP in 2025?"
+        },
+        {
+          "sqlText": "SELECT c.REGION, AVG(i.VALUE) AS AVG_DEBT_TO_GDP FROM API_DEMO.PUBLIC.IMF_DATAMAPPER_INDICATORS i JOIN API_DEMO.PUBLIC.COUNTRY_METADATA c ON i.COUNTRY_CODE = c.COUNTRY_CODE WHERE i.INDICATOR = 'GGXWDG_NGDP' AND i.YEAR = 2024 GROUP BY c.REGION ORDER BY AVG_DEBT_TO_GDP DESC",
+          "correspondingQuestion": "What is the average government debt to GDP ratio by region in 2024?"
+        }
+      ]
+    },
+    "semanticDescription": "IMF World Economic Outlook data covering 15 macroeconomic indicators (GDP, inflation, unemployment, government debt, current account balance, population, PPP metrics) for 60 countries from 1980 to 2030, enriched with country classifications (region, income group, G7/G20/emerging market membership).",
+    "metadata": {
+      "warehouse": "COMPUTE_WH"
+    }
+  }
+}
