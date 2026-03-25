@@ -239,6 +239,22 @@ psql "service=btc_postgres" -c \
           round(max(price)::numeric, 2) AS max_price
    FROM flow1_cdc.btc_trades
    GROUP BY side;"
+   
+# Delete all values
+psql "service=btc_postgres" -c \
+  "TRUNCATE TABLE flow1_cdc.btc_trades;"
+  
+# Emptying aws s3 bucket
+aws s3 rm s3://snowflake-mcastro/btc_trades/ --recursive --include "*.json" --profile mcastro-se-sandbox
+
+# Checking uniqueids in aws s3
+aws s3 cp s3://snowflake-mcastro/btc_trades/ /tmp/btc_count/ --recursive --include "*.json" --profile mcastro-se-sandbox && \python3 -c "import json, glob
+ids = set()
+for f in glob.glob('/tmp/btc_count/*.json'):
+  for e in json.load(open(f)):
+    ids.add(e['trade_id'])
+print(f'Unique trade_ids: {len(ids)}')
+"
 ```
 
 ### Troubleshooting
